@@ -1,0 +1,36 @@
+name: CI with SonarQube
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Tests with Coverage
+        run: |
+          pytest --cov=src --cov-report=xml
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@v3
+        with:
+          projectBaseDir: .
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: http://<your-sonarqube-server>:9000
